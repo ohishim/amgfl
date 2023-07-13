@@ -1,0 +1,17 @@
+#' An example dataset
+#'
+#' This is en example dataset with spatial information
+#'
+#' @format A data frame with 10000 rows and 8 columns:
+#' \describe{
+#'   \item{y}{response variable}
+#'   \item{V1}{explanatory variable 1}
+#'   \item{V2}{explanatory variable 2}
+#'   \item{V3}{explanatory variable 3}
+#'   \item{V4}{explanatory variable 4}
+#'   \item{long}{x-coordinate of the observed point}
+#'   \item{lati}{y-coordinate of the observed point}
+#'   \item{subregion}{subregions}
+#' }
+#' @source none
+"exData"

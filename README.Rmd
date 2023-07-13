@@ -1,0 +1,191 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# amgfl (v0.1.0; in development)
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+This package implements trend estimations by semiparametric additive model with graph trend filtering via generalized fused Lasso. 
+Furthermore, with the trend estimation results, it provides simultaneous confidence intervals via the bootstrap.
+
+**cite this package:**  
+Ohishi, M., Fukui, K. & Yanagihara, H. (2023).
+amgfl: Trend estimations by semiparametric additive model with graph trend filtering via generalized fused Lasso. 
+R package version 0.1.0. 
+https://github.com/ohishim/amgfl
+
+## Installation
+
+You can install the development version of amgfl like so:
+
+```{r eval=F}
+# install.packages("devtools")
+devtools::install_github("ohishim/amgfl")
+```
+
+## Description
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r eval=F}
+library(amgfl)
+
+res <- amgfl(dataset, space, nknots)  # estimation
+CI <- amgfl.CI(res)                   # simultaneous confidence intervals
+```
+
+This package can handle three cases:  
+- (D1) a space division is given by a user.  
+- (D2) a space is divided by `amgfl`.  
+- (D3) a space is divided by `amgfl` for each subregion. 
+
+The three cases are decided by the definition of the parameter `space`.
+
+**(D1)** The `space` is defined by
+```{r eval=F}
+space <- list(
+  area = area, 
+  adjacent = adjacent, 
+  Sp = Sp,           # optional
+  div.pol = div.pol  # optional
+)
+```
+in which names of each element must be given.
+The `area` is a vector of integers expressing sub-areas for each individual.
+The `adjacent` is a matrix with two columns expressing adjacent relationships among sub-areas.
+For example, consider the following adjacent relationships among four sub-areas: 
+```{r warning=F, echo=F, message=F}
+library(igraph)
+```
+
+```{r echo=F, fig.align='center'}
+g <- graph(
+  edges=rbind(c(1, 1, 1, 3), c(2, 3, 4, 4)),
+  n=4,        
+  directed=F  
+)
+
+C <- layout_with_kk(g) 
+
+plot(
+  g,
+  vertex.size = 25,             
+  vertex.label.cex = 2,        
+  vertex.color = "white",      
+  vertex.label.color = "black", 
+  layout = C,                  
+  edge.color = "black",          
+  edge.width = 3               
+)
+```
+where a line indicates the two sub-areas are adjacent.
+Then, `adjacent` must be defined by
+```{r echo=F}
+cbind(
+  c(rep(1, 3), 2, 3, 3, 4, 4),
+  c(2:4, 1, 1, 4, 1, 3)
+)
+```
+The `Sp` is an optional parameter which is a matrix with two columns expressing coordinates of observed points.
+If it is defined, figures in the output of `amgfl` have the observed points.  
+The `div.pol` is an optional parameter which is an optional parameter which is an sfc_POLYGON object expressing a spatial division.
+If it is defined, clustering result is output as a figure.
+
+**(D2)** The `space` is defined by
+```{r eval=F}
+space <- list(
+  Sp = Sp, 
+  m = m,       # optional
+  spB = spB,   # optional
+  seed = seed  # optional
+)
+```
+in which names of each element must be given.
+The `Sp` is the same of (D1) but must be required.
+The `m` is an optional parameter expressing the number of sub-areas.
+If `m` is not given, it is defined by `nrow(Sp) %>% divide_by(100) %>% ceiling`.
+The `spB` is an optional parameter which is an sfc_POLYGON object expressing a boundary of the space subjected to analysis.
+If `spB` is not given, it is defined by a convex hull of the observed points.
+The `seed` is an optional parameter which is the first parameter of `set.seed`.
+In this case, with `Sp` and `m`, the space is divided by the following procedure:  
+1. calculate `m` central points by `kmeans(Sp, m)`.  
+1. with the `m` points, the space is divided in `m` sub-areas by a voronoi tessellation implemented by sf package.  
+
+To fix the result by `kmeans`, `seed` is required.  
+
+**(D3)** The `space` is defined by
+```{r eval=F}
+space <- list(
+  Sp = Sp,
+  spB = spB, 
+  subregion = subregion, 
+  m = m,       # optional
+  seed = seed  # optional
+)
+```
+in which names of each element must be given.
+The `Sp` is the same of (D1) and (D2).
+The `spB` is an sfc_POLYGON object expressing a boundary of each subregion.
+The `subregion` is a vector expressing subregion for each individual.
+The `m` is an optional parameter which is a vector expressing the numbers of sub-areas for each subregion.
+The `seed` is the same of (D2).
+
+## Example
+
+```{r echo=F, message=F, warning=F}
+devtools::load_all()
+```
+
+This package has the following example data:
+```{r}
+head(exData)
+```
+Moreover, `exSR` has an information of subregion in `exData`.
+The example space is visible as
+```{r warning=F, message=F}
+library(ggplot2) 
+
+ggplot() + 
+  geom_sf(data=exSR, aes(fill=subregion)) + 
+  geom_point(data=exData, aes(x=long, y=lati))
+```
+For such data, case (D3) is executed as
+```{r warning=F, message=F}
+library(magrittr)
+
+dataset <- list(
+  y = exData$y, 
+  X2 = exData %$% cbind(V1, V2, V3, V4) 
+)
+
+space <- list(
+  Sp = exData %$% cbind(long, lati), 
+  spB = exSR$geometry, 
+  subregion = exData$subregion
+)
+
+res <- amgfl(dataset, space, 15)
+```
+Then, the space is divided for each subregion as
+```{r}
+res$division
+```
+Trends for explanatory variables and spatial effects are obtain as 
+```{r}
+res$trends.all
+res$cluster
+```
+Note that a figure `trends.all` has densities of each variable in the bottom but it looks a thick line in the above figure because the four variables are generated by a uniform distribution.

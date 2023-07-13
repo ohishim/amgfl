@@ -1,0 +1,16 @@
+citHeader("To cite amgfl in publications use:")
+
+citEntry(
+  entry    = "Manual",
+  title    = "amgfl: Trend estimations by semiparametric additive model with graph trend filtering via generalized fused Lasso",
+  author   = "Ohishi M., Fukui K., Yanagihara H.",
+  year     = 2023,
+  note     = "R package version 0.1.0",
+  url      = "https://github.com/ohishim/amgfl",
+  textVersion = paste("
+    Ohishi, M., Fukui, K. & Yanagihara, H. (2023).
+    amgfl: Trend estimations by semiparametric additive model with graph trend filtering via generalized fused Lasso.
+    R package version 0.1.0.
+    https://github.com/ohishim/amgfl
+  ")
+)
