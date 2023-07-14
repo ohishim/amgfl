@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# amgfl (v0.1.0; in development)
+# amgfl (v0.1.0)
 
 <!-- badges: start -->
 <!-- badges: end -->
