@@ -78,9 +78,9 @@ must be defined by
 The `Sp` is an optional parameter which is a matrix with two columns
 expressing coordinates of observed points. If it is defined, figures in
 the output of `amgfl` have the observed points.  
-The `div.pol` is an optional parameter which is an optional parameter
-which is an sfc_POLYGON object expressing a spatial division. If it is
-defined, clustering result is output as a figure.
+The `div.pol` is an optional parameter which is an sfc_POLYGON object
+expressing a spatial division. If it is defined, clustering result is
+output as a figure.
 
 **(D2)** The `space` is defined by
 
