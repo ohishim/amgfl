@@ -29,7 +29,7 @@ https://github.com/ohishim/amgfl
 
 ## Installation
 
-You can install the development version of amgfl like so:
+You can install the R package amgfl like so:
 
 ```{r eval=F}
 # install.packages("devtools")

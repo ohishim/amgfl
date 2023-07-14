@@ -19,7 +19,7 @@ generalized fused Lasso. R package version 0.1.0.
 
 ## Installation
 
-You can install the development version of amgfl like so:
+You can install the R package amgfl like so:
 
 ``` r
 # install.packages("devtools")
