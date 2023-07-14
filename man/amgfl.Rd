@@ -2,7 +2,8 @@
 % Please edit documentation in R/amgfl.R
 \name{amgfl}
 \alias{amgfl}
-\title{Trend estimations by semiparametric additive model with graph trend filtering via generalized fused Lasso}
+\title{Trend estimations by semiparametric additive model
+with graph trend filtering via generalized fused Lasso (v0.6.2)}
 \usage{
 amgfl(
   dataset,

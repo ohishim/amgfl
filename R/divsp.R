@@ -1,6 +1,8 @@
 
+# v0.4.1
+
 #' @importFrom magrittr %>% divide_by
-#' @importFrom purrr array_tree map map_dbl
+#' @importFrom purrr array_tree map exec map_dbl
 #' @importFrom sf st_agr st_collection_extract st_convex_hull st_intersection
 #'     st_intersects st_multipoint st_point st_sfc st_touches st_voronoi
 #' @importFrom stats kmeans
@@ -44,7 +46,7 @@ divsp <- function(Sp, m=NULL, spB=NULL, subregion=NULL, seed=123){
             st_collection_extract(type="POLYGON") %>% st_intersection(spB[.x])
         )
       }
-    }) %>% invoke(c, .) %>%
+    }) %>% exec(c, !!!.) %>%
       st_sf(
         area = 1:sum(m),
         geometry = .
@@ -84,7 +86,7 @@ divsp <- function(Sp, m=NULL, spB=NULL, subregion=NULL, seed=123){
   adj <- st_touches(div)
   adjD <- lapply(1:sum(m), function(j){
     data.frame(area=j, adj=adj[[j]])
-  }) %>% do.call(rbind, .)
+  }) %>% exec(rbind, !!!.)
 
   ##############################################################################
   ###   output

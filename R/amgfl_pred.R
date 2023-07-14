@@ -1,8 +1,8 @@
-#' @title Estimation for future observations
+#' @title Estimation for future observations (v0.0.2)
 #' @description \code{amgfl.pred} This function provides predictive values for future observations
 #'
 #' @importFrom magrittr %>%
-#' @importFrom purrr invoke map map_dbl
+#' @importFrom purrr exec map map_dbl
 #' @importFrom sf st_point st_intersects
 #'
 #' @param res the output of `amgfl`
@@ -48,7 +48,7 @@ amgfl.pred <- function(res, X1=NULL, X2, area=NULL, Sp=NULL){
 
   k2 <- ncol(X2)
 
-  X <- map(1:k2, ~fx(X2[,.x])) %>% invoke(cbind, .)
+  X <- map(1:k2, ~fx(X2[,.x])) %>% exec(cbind, !!!.)
 
   if(is.X1)
   {
@@ -58,7 +58,7 @@ amgfl.pred <- function(res, X1=NULL, X2, area=NULL, Sp=NULL){
   X <- scale(X, center=res$center$X, scale=F)
 
   B <- map(1:k2, ~fb(X2[,.x], KNOTS[.x,], nknots)) %>%
-    invoke(cbind, .) %>% scale(center=res$center$B, scale=F)
+    exec(cbind, !!!.) %>% scale(center=res$center$B, scale=F)
 
   if(!is.null(area))
   {

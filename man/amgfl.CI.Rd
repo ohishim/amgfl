@@ -2,7 +2,7 @@
 % Please edit documentation in R/amgfl_CI.R
 \name{amgfl.CI}
 \alias{amgfl.CI}
-\title{Simultaneous confidence intervals via the bootstrap}
+\title{Simultaneous confidence intervals via the bootstrap (v0.2.2)}
 \usage{
 amgfl.CI(
   res,

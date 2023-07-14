@@ -2,7 +2,7 @@
 % Please edit documentation in R/amgfl_pred.R
 \name{amgfl.pred}
 \alias{amgfl.pred}
-\title{Estimation for future observations}
+\title{Estimation for future observations (v0.0.2)}
 \usage{
 amgfl.pred(res, X1 = NULL, X2, area = NULL, Sp = NULL)
 }

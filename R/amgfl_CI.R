@@ -1,4 +1,4 @@
-#' @title Simultaneous confidence intervals via the bootstrap
+#' @title Simultaneous confidence intervals via the bootstrap (v0.2.2)
 #' @description \code{amgfl.CI} This function provides simultaneous confidence intervals
 #'     via the bootstrap
 #'
@@ -6,7 +6,7 @@
 #' @importFrom ggplot2 aes element_blank facet_wrap geom_line geom_ribbon
 #'     geom_segment geom_sf ggplot scale_fill_gradientn theme
 #' @importFrom magrittr %>% divide_by multiply_by raise_to_power set_colnames set_names
-#' @importFrom purrr invoke map map_dbl
+#' @importFrom purrr exec map map_dbl
 #' @importFrom sf st_sf
 #'
 #' @param res the output of `amgfl`
@@ -111,7 +111,7 @@ amgfl.CI <- function(
   ###   calculate confidence intervals
   ##############################################################################
 
-  XIbar <- map(XI, ~Rfast::colmeans(.x)) %>% invoke(rbind, .)
+  XIbar <- map(XI, ~Rfast::colmeans(.x)) %>% exec(rbind, !!!.)
   XI.C <- map(XI, ~scale(.x, scale=F))
   S <- map(XI.C, ~{t(.x)%*%.x / N})
 
@@ -122,7 +122,7 @@ amgfl.CI <- function(
   C <- apply(X2, 2, range)
   C.div <- map(1:k2, ~seq(
     C[1, .x], C[2, .x], length=Ndiv
-  )) %>% invoke(cbind, .) %>% set_colnames(V2)
+  )) %>% exec(cbind, !!!.) %>% set_colnames(V2)
 
   if(scale2)
   {
@@ -151,7 +151,7 @@ amgfl.CI <- function(
         )
       })
     )
-  }) %>% invoke(cbind, .) %>% set_colnames(V2)
+  }) %>% exec(cbind, !!!.) %>% set_colnames(V2)
 
   .T <- map(1:k2, ~{
     j <- .x
@@ -164,9 +164,9 @@ amgfl.CI <- function(
           XI.C[[j]] %>% scale(center=F, scale=1/h) %>% Rfast::rowsums() %>% abs %>%
             divide_by(hSh[.x, j])
         )
-      }) %>% invoke(rbind, .) %>% Rfast::colMaxs(value=T)
+      }) %>% exec(rbind, !!!.) %>% Rfast::colMaxs(value=T)
     )
-  }) %>% invoke(cbind, .) %>% set_colnames(V2)
+  }) %>% exec(cbind, !!!.) %>% set_colnames(V2)
 
   .t <- abs(Mu.C) %>% divide_by(sqrt(s)) %>% Rfast::rowMaxs(value=T)
 
@@ -186,14 +186,14 @@ amgfl.CI <- function(
       ) %>% drop,
       z = z[.x]*hSh[,.x]
     ) %>% unique %>% mutate(v = V2[.x])
-  }) %>% invoke(rbind, .) %>% mutate(v = factor(v, levels=V2))
+  }) %>% exec(rbind, !!!.) %>% mutate(v = factor(v, levels=V2))
 
   ggDseg0 <- split(ggD, ggD$v) %>% map(~{
     y <- .x$y; z <- .x$z
     y1 <- y - z; y2 <- y + z
     return(c(min(y1), max(y2) - min(y1)))
   }) %>%
-    invoke(rbind, .) %>% as.data.frame %>% set_colnames(c("m", "r"))
+    exec(rbind, !!!.) %>% as.data.frame %>% set_colnames(c("m", "r"))
 
   ggDseg <- V2 %>% map(~{
     data.frame(
@@ -201,7 +201,7 @@ amgfl.CI <- function(
       y = ggDseg0[.x, 1],
       v = .x
     ) %>% mutate(yend = y - ggDseg0[.x, 2]/50)
-  }) %>% invoke(rbind, .) %>% mutate(v = factor(v, levels=V2))
+  }) %>% exec(rbind, !!!.) %>% mutate(v = factor(v, levels=V2))
 
   trends <- map(1:k2, ~{
     .xlab <- V2[.x]

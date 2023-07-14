@@ -1,4 +1,5 @@
-#' @title Trend estimations by semiparametric additive model with graph trend filtering via generalized fused Lasso
+#' @title Trend estimations by semiparametric additive model
+#'     with graph trend filtering via generalized fused Lasso (v0.6.2)
 #' @description \code{amgfl} This function provides trend estimation results
 #'     by semiparametric additive model with graph trend filtering via generalized fused Lasso
 #'
@@ -7,7 +8,7 @@
 #'     ggplot scale_fill_gradientn theme xlab
 #' @importFrom grDevices colorRampPalette
 #' @importFrom magrittr %>% inset2 set_colnames set_names set_rownames
-#' @importFrom purrr invoke map
+#' @importFrom purrr exec map
 #' @importFrom Rfast colmeans
 #' @importFrom sf st_point st_sf st_sfc
 #' @importFrom stats quantile sd
@@ -204,13 +205,13 @@ amgfl <- function(
 
   KNOTS <- map(1:k2, ~{
     quantile(X2[,.x], probs = seq(0, 1, (1/(nknots+1))))[-c(1, nknots+2)]
-  }) %>% invoke(rbind, .) %>% set_rownames(V2)
+  }) %>% exec(rbind, !!!.) %>% set_rownames(V2)
 
   ##############################################################################
   ###   calculate initial values
   ##############################################################################
 
-  .X <- map(1:k2, ~fx(X2[,.x])) %>% invoke(cbind, .) %>%
+  .X <- map(1:k2, ~fx(X2[,.x])) %>% exec(cbind, !!!.) %>%
     set_colnames(map(V2, ~paste0(.x, 1:3)) %>% unlist)
 
   if(is.X1)
@@ -227,7 +228,7 @@ amgfl <- function(
   )
 
   .B <- map(1:k2, ~fb(X2[,.x], KNOTS[.x,], nknots)) %>%
-    invoke(cbind, .) %>%
+    exec(cbind, !!!.) %>%
     set_colnames(
       map(V2, ~paste0(.x, 1:nknots)) %>% unlist
     )
@@ -408,7 +409,7 @@ amgfl <- function(
   C <- apply(.X2, 2, range)
   C.div <- map(1:k2, ~seq(
     C[1, .x], C[2, .x], length=100
-  )) %>% invoke(cbind, .) %>% set_colnames(V2)
+  )) %>% exec(cbind, !!!.) %>% set_colnames(V2)
 
   if(scale2)
   {
@@ -434,10 +435,10 @@ amgfl <- function(
         Alpha.hat[paste0(V2[.x], 1:nknots)]
       ) %>% drop
     ) %>% unique %>% mutate(v = V2[.x])
-  }) %>% invoke(rbind, .) %>% mutate(v = factor(v, levels=V2))
+  }) %>% exec(rbind, !!!.) %>% mutate(v = factor(v, levels=V2))
 
   ggDseg0 <- split(ggD$y, ggD$v) %>% map(~c(min(.x), max(.x) - min(.x))) %>%
-    invoke(rbind, .) %>% as.data.frame %>% set_colnames(c("m", "r"))
+    exec(rbind, !!!.) %>% as.data.frame %>% set_colnames(c("m", "r"))
 
   ggDseg <- V2 %>% map(~{
     data.frame(
@@ -445,7 +446,7 @@ amgfl <- function(
       y = ggDseg0[.x, 1],
       v = .x
     ) %>% mutate(yend = y - ggDseg0[.x, 2]/50)
-  }) %>% invoke(rbind, .) %>% mutate(v = factor(v, levels=V2))
+  }) %>% exec(rbind, !!!.) %>% mutate(v = factor(v, levels=V2))
 
   out$trends <- map(1:k2, ~{
     xlab <- V2[.x]
