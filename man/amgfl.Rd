@@ -3,12 +3,12 @@
 \name{amgfl}
 \alias{amgfl}
 \title{Trend estimations by semiparametric additive model
-with graph trend filtering via generalized fused Lasso (v0.6.2)}
+with graph trend filtering via generalized fused Lasso (v0.7.0)}
 \usage{
 amgfl(
   dataset,
   space,
-  nknots,
+  nknots = NULL,
   scale1 = FALSE,
   scale2 = FALSE,
   power1 = 2,

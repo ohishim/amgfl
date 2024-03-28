@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# amgfl (v0.1.0)
+# amgfl (v0.2.0)
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -11,10 +11,10 @@ model with graph trend filtering via generalized fused Lasso.
 Furthermore, with the trend estimation results, it provides simultaneous
 confidence intervals via the bootstrap.
 
-**cite this package:**  
-Ohishi, M., Fukui, K. & Yanagihara, H. (2023). amgfl: Trend estimations
+**cite this package of the latest version:**  
+Ohishi, M., Fukui, K. & Yanagihara, H. (2024). amgfl: Trend estimations
 by semiparametric additive model with graph trend filtering via
-generalized fused Lasso. R package version 0.1.0.
+generalized fused Lasso. R package version 0.2.0.
 <https://github.com/ohishim/amgfl>
 
 ## Installation

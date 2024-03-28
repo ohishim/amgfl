@@ -1,7 +1,7 @@
 Package: amgfl
 Type: Package
 Title: Trend estimations by semiparametric additive model with graph trend filtering via generalized fused Lasso
-Version: 0.1.0
+Version: 0.2.0
 Author: Mineaki Ohishi, Keisuke Fukui & Hirokazu Yanagihara
 Maintainer: Mineaki Ohishi <mineaki.ohishi.a4@tohoku.ac.jp>
 Description: This package implements trend estimations by semiparametric additive model 

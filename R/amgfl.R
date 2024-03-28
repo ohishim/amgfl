@@ -1,5 +1,5 @@
 #' @title Trend estimations by semiparametric additive model
-#'     with graph trend filtering via generalized fused Lasso (v0.6.2)
+#'     with graph trend filtering via generalized fused Lasso (v0.7.0)
 #' @description \code{amgfl} This function provides trend estimation results
 #'     by semiparametric additive model with graph trend filtering via generalized fused Lasso
 #'
@@ -7,7 +7,7 @@
 #' @importFrom ggplot2 aes element_blank facet_wrap geom_line geom_segment geom_sf
 #'     ggplot scale_fill_gradientn theme xlab
 #' @importFrom grDevices colorRampPalette
-#' @importFrom magrittr %>% inset2 set_colnames set_names set_rownames
+#' @importFrom magrittr %>% inset2 set_colnames set_names set_rownames subtract
 #' @importFrom purrr exec map
 #' @importFrom Rfast colmeans
 #' @importFrom sf st_point st_sf st_sfc
@@ -103,7 +103,7 @@
 #' #amgfl(dataset, space, nknots)
 
 amgfl <- function(
-    dataset, space, nknots,
+    dataset, space, nknots=NULL,
     scale1=FALSE, scale2=FALSE, power1=2, power2=NULL,
     maxit=100, tol=1e-8, progress=FALSE, complete=TRUE
 ){
@@ -114,6 +114,9 @@ amgfl <- function(
   X1 <- dataset$X1
   X2 <- dataset$X2
 
+  if(is.null(y)){stop("`dataset$y` must be given")}
+  if(is.null(X2)){stop("`dataset$X2` must be given")}
+
   n <- length(y)
   is.X1 <- !is.null(X1)
 
@@ -121,11 +124,17 @@ amgfl <- function(
 
   if(is.null(space$adjacent))
   {
+    if(is.null(space$Sp)){stop("`space$Sp` must be given")}
+    if(is.null(space$seed)){space$seed <- 123}
+
     div <- divsp(space$Sp, space$m, space$spB, space$subregion, space$seed)
 
     space$area <- div$area
     space$adjacent <- div$adjacent
     space$`div.pol` <- div$div.pol$geometry
+  } else
+  {
+    if(is.null(space$area)){stop("`space$area` must be given")}
   }
 
   indiv.order <- order(space$area)
@@ -149,6 +158,9 @@ amgfl <- function(
 
   V1 <- colnames(X1)
   V2 <- colnames(X2)
+
+  if(is.X1 & is.null(V1)){stop("column names of `dataset$X1` must be given")}
+  if(is.null(V2)){stop("column names of `dataset$X2` must be given")}
 
   .X1 <- X1
   .X2 <- X2
@@ -201,7 +213,23 @@ amgfl <- function(
     return(out)
   }
 
+  k1 <- ifelse(is.X1, ncol(X1), 0)
   k2 <- ncol(X2)
+  m <- ncol(R)
+
+  nknots.max <- apply(X2, 2, function(x){unique(x) %>% length}) %>% min %>%
+    subtract(4) %>% c(floor((n - (k1+3*k2) - m)/k2)) %>% min
+
+  if(is.null(nknots))
+  {
+    nknots <- c(10, nknots.max-2) %>% min
+  } else
+  {
+    if(nknots > nknots.max)
+    {
+      stop(paste0("`nknots` must be smaller than ", nknots.max, " at least"))
+    }
+  }
 
   KNOTS <- map(1:k2, ~{
     quantile(X2[,.x], probs = seq(0, 1, (1/(nknots+1))))[-c(1, nknots+2)]
@@ -242,13 +270,19 @@ amgfl <- function(
   B.B <- B. %*% B
   X. <- t(X)
   M <- X. %*% X
-  M.inv <- solve(M)
+
+  M.inv <- try(solve(M), silent=TRUE)
+  if("try-error" %in% class(M.inv)){stop("cubic spline probably generated too large values or caused a rank deficient")}
+
   X.B <- X. %*% B
   B.X <- t(X.B)
   W <- B.B - B.X%*%M.inv%*%X.B
   W.inv <- solve(W)
   eigW <- eigen(W)
   d <- eigW$values
+
+  if(any(d < 0)){stop("`nknots` is probably too large")}
+
   Q <- eigW$vectors
   Q. <- t(Q)
 
@@ -278,7 +312,10 @@ amgfl <- function(
   Q. <- t(Q)
 
   Z <- cbind(X, B, R); Z. <- t(Z)
-  LSE <- solve(Z.%*%Z) %*% Z. %*% y
+
+  LSE <- try(solve(Z.%*%Z) %*% Z. %*% y, silent=TRUE)
+  if("try-error" %in% class(LSE)){stop("`nknots` is probably too large")}
+
   Beta.LSE <- LSE[1:xn]
   Alpha.LSE <- LSE[(xn+1):(xn+bn)]
   Mu.LSE <- LSE[(xn+bn+1):ncol(Z)]
